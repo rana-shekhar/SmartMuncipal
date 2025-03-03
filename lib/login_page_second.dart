@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/otp_page.dart';
 
-class LoginPageSecond extends StatelessWidget {
+class LoginPageSecond extends StatefulWidget {
   const LoginPageSecond({super.key});
 
+  @override
+  State<LoginPageSecond> createState() => _LoginPageSecondState();
+}
+
+class _LoginPageSecondState extends State<LoginPageSecond> {
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
     TextEditingController phoneController = TextEditingController();
+    // bool isLoading = false;
 
     return Scaffold(
       appBar: AppBar(
