@@ -1,11 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/home_screen.dart';
+import 'package:flutter_application_1/register_page.dart';
 
-class OtpPage extends StatelessWidget {
+class OtpPage extends StatefulWidget {
   final String verificationId;
-  const OtpPage({required this.verificationId, super.key});
 
+  const OtpPage({required this.verificationId, super.key, });
+
+  @override
+  State<OtpPage> createState() => _OtpPageState();
+}
+
+class _OtpPageState extends State<OtpPage> {
   @override
   Widget build(BuildContext context) {
     TextEditingController otpController = TextEditingController();
@@ -22,7 +30,8 @@ class OtpPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Enter OTP', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text('Enter OTP',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 30),
             TextFormField(
               controller: otpController,
@@ -30,7 +39,8 @@ class OtpPage extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: 'OTP',
                 prefixIcon: const Icon(Icons.lock),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 30),
@@ -38,22 +48,50 @@ class OtpPage extends StatelessWidget {
               onPressed: () async {
                 try {
                   PhoneAuthCredential credential = PhoneAuthProvider.credential(
-                    verificationId: verificationId,
-                    smsCode: otpController.text,
+                    verificationId: widget.verificationId,
+                    smsCode: otpController.text.trim(),
                   );
-                  await FirebaseAuth.instance.signInWithCredential(credential);
-                  print("Login Successful");
-                  // ignore: use_build_context_synchronously
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("OTP Verified")));
 
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+                  UserCredential userCredential = await FirebaseAuth.instance
+                      .signInWithCredential(credential);
+                  String uid =
+                      userCredential.user!.uid; // Firebase ka unique ID
+
+                  // Firestore ko check karega ki user already hai ya nahi
+                  var userDoc = await FirebaseFirestore.instance
+                      .collection("Users")
+                      .doc(uid)
+                      .get();
+
+                  if (userDoc.exists) {
+                    print("User Already Registered ✅");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Welcome Back!")),
+                    );
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HomeScreen()));
+                  } else {
+                    print("New User 🔥");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Proceed to Registration")),
+                    );
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RegistrationScreen()));
+                  }
                 } catch (e) {
-                  print("Invalid OTP: \$e");
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invalid OTP")));
+                  print("Invalid OTP: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Invalid OTP")),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50), backgroundColor: Colors.blue,
+                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

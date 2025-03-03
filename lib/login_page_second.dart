@@ -78,7 +78,7 @@ class _LoginPageSecondState extends State<LoginPageSecond> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    OtpPage(verificationId: verificationId),
+                                    OtpPage(verificationId: verificationId,),
                               ),
                             );
                           },
