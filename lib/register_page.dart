@@ -80,9 +80,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
    phoneController.text =  '+91${context.read<DataProvider>().text}';
+    final List<String> wards = context.read<DataProvider>().items;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("User Registration"),
+        title: const Text("Registration"),
         backgroundColor: Colors.blue,
         centerTitle: true,
       ),
@@ -140,7 +141,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
                 value: selectedWard,
-                items: ["Ward 1", "Ward 2", "Ward 3"]
+                items: wards
                     .map((ward) =>
                         DropdownMenuItem(value: ward, child: Text(ward)))
                     .toList(),
