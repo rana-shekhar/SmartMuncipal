@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/otp_page.dart';
+import 'package:flutter_application_1/providers/data_provider.dart';
+import 'package:provider/provider.dart';
 
 class LoginPageSecond extends StatefulWidget {
   const LoginPageSecond({super.key});
@@ -65,6 +67,7 @@ class _LoginPageSecondState extends State<LoginPageSecond> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () async {
+                      context.read<DataProvider>().updateText(phoneController.text);
                       if (formKey.currentState!.validate()) {
                         await FirebaseAuth.instance.verifyPhoneNumber(
                           phoneNumber: '+91${phoneController.text}',

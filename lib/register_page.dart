@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/home_screen.dart';
 import 'package:flutter_application_1/model/data.dart';
+import 'package:flutter_application_1/providers/data_provider.dart';
+import 'package:provider/provider.dart';
 
 class RegistrationScreen extends StatefulWidget {
 
@@ -22,6 +24,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController cityController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   String? selectedWard;
+
   @override
   void initState() {
     super.initState();
@@ -45,15 +48,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       await FirebaseFirestore.instance.collection("users").add(user.toMap());
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("🎯 Registration Successful")),
+        const SnackBar(content: Text("🎯 Registration Successful")),
       );
 
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text("🎉 Hurray!"),
-            content: Text("You're now registered 🥳"),
+            title: const Text("🎉 Hurray!"),
+            content: const Text("You're now registered 🥳"),
             actions: [
               TextButton(
                 onPressed: () {
@@ -63,7 +66,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     MaterialPageRoute(builder: (context) => const HomeScreen()),
                   );
                 },
-                child: Text("OK"),
+                child: const Text("OK"),
               ),
             ],
           );
@@ -76,9 +79,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
+   phoneController.text =  '+91${context.read<DataProvider>().text}';
     return Scaffold(
       appBar: AppBar(
-        title: Text("User Registration"),
+        title: const Text("User Registration"),
         backgroundColor: Colors.blue,
         centerTitle: true,
       ),
@@ -91,7 +95,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: nameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Your Name",
                   border: OutlineInputBorder(),
                 ),
@@ -99,9 +103,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               const SizedBox(height: 20),
               TextFormField(
-                controller: phoneController,
-                enabled: true,
-                decoration: InputDecoration(
+                controller:  phoneController,
+                enabled: false,
+                decoration: const InputDecoration(
                   labelText: "Phone Number",
                   border: OutlineInputBorder(),
                 ),
@@ -109,7 +113,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: stateController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "State",
                   border: OutlineInputBorder(),
                 ),
@@ -118,7 +122,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: cityController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "City",
                   border: OutlineInputBorder(),
                 ),
@@ -127,7 +131,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: addressController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Address",
                   border: OutlineInputBorder(),
                 ),
@@ -140,7 +144,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     .map((ward) =>
                         DropdownMenuItem(value: ward, child: Text(ward)))
                     .toList(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Select Ward No.",
                   border: OutlineInputBorder(),
                 ),
@@ -152,7 +156,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 onPressed: registerUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
-                  minimumSize: Size(double.infinity, 50),
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

@@ -80,7 +80,7 @@ class _OtpPageState extends State<OtpPage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => RegistrationScreen()));
+                            builder: (context) => const RegistrationScreen()));
                   }
                 } catch (e) {
                   print("Invalid OTP: $e");
