@@ -21,4 +21,25 @@ void updateItems(List<String> newItems) {
     items = newItems;
     notifyListeners();
   }
+
+  List<String> cities = ['Select City', 'Hisar', 'Delhi', 'Mumbai'];
+void updateCities(List<String> newCities) {
+    cities = newCities;
+    notifyListeners();
+  }
+
+  List<String> topics = [
+    'Select Topic',
+    'Road Damage',
+    'Garbage Issue',
+    'Water Problem'
+  ];
+  void updateTopics(List<String> newTopics) {
+    topics = newTopics;
+    notifyListeners();
+  }
 }
+
+
+  
+ 

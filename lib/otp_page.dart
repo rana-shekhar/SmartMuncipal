@@ -60,10 +60,10 @@ class _OtpPageState extends State<OtpPage> {
                   // Firestore ko check karega ki user already hai ya nahi
                   var userDoc = await FirebaseFirestore.instance
                       .collection("Users")
-                      .doc(uid)
+                      .where('phone', isEqualTo: userCredential.user!.phoneNumber)  
                       .get();
 
-                  if (userDoc.exists) {
+                  if (userDoc.docs.isNotEmpty) {
                     print("User Already Registered ✅");
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Welcome Back!")),
@@ -71,7 +71,7 @@ class _OtpPageState extends State<OtpPage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const HomeScreen()));
+                            builder: (context) =>  HomeScreen()));
                   } else {
                     print("New User 🔥");
                     ScaffoldMessenger.of(context).showSnackBar(

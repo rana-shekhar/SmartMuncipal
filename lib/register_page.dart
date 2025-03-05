@@ -38,7 +38,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (_formKey.currentState!.validate()) {
       UserModel user = UserModel(
         name: nameController.text,
-        phone: phoneController.text,
+        phone: phoneController.text.trim(),
         state: stateController.text,
         city: cityController.text,
         address: addressController.text,
@@ -63,7 +63,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    MaterialPageRoute(builder: (context) =>  HomeScreen()),
                   );
                 },
                 child: const Text("OK"),
