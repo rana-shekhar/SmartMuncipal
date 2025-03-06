@@ -63,7 +63,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) =>  HomeScreen()),
+                    MaterialPageRoute(builder: (context) =>  const HomeScreen()),
                   );
                 },
                 child: const Text("OK"),

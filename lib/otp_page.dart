@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/home_screen.dart';
-import 'package:flutter_application_1/register_page.dart';
+import 'package:flutter_application_1/auth_check.dart';
 
 class OtpPage extends StatefulWidget {
   final String verificationId;
@@ -57,31 +55,13 @@ class _OtpPageState extends State<OtpPage> {
                   String uid =
                       userCredential.user!.uid; // Firebase ka unique ID
 
-                  // Firestore ko check karega ki user already hai ya nahi
-                  var userDoc = await FirebaseFirestore.instance
-                      .collection("Users")
-                      .where('phone', isEqualTo: userCredential.user!.phoneNumber)  
-                      .get();
-
-                  if (userDoc.docs.isNotEmpty) {
-                    print("User Already Registered ✅");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Welcome Back!")),
-                    );
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>  HomeScreen()));
-                  } else {
-                    print("New User 🔥");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Proceed to Registration")),
-                    );
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const RegistrationScreen()));
-                  }
+                 Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AuthCheck() ,
+                    ),
+                  );
+                 
                 } catch (e) {
                   print("Invalid OTP: $e");
                   ScaffoldMessenger.of(context).showSnackBar(

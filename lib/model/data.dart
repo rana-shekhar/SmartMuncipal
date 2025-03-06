@@ -30,3 +30,28 @@ class UserModel {
     };
   }
 }
+
+class Complaint {
+  String city;
+  String ward;
+  String address;
+  String topic;
+  String description;
+
+  Complaint({
+    required this.city,
+    required this.ward,
+    required this.address,
+    required this.topic,
+    required this.description,
+  });
+  Map<String, dynamic> toMap() {
+    return {
+      "city": city,
+      "ward": ward,
+      "address": address,
+      "topic": topic,
+      "description": description,
+    };
+  }
+}
