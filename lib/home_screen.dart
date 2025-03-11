@@ -17,41 +17,53 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String?selectedCity;
+
+  String? selectedTopic;
+  bool keepAnonymous = false;
+  String? selectedWard;
+
+  TextEditingController cityController = TextEditingController();
+  TextEditingController wardController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController topicController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+
+  void registerComplaint() async {
+    if (formKey.currentState!.validate()) {
+      Complaint complaint = Complaint(
+        city: selectedCity ?? '',
+        ward: selectedWard ?? '',
+        address: addressController.text,
+        topic: selectedTopic ?? '',
+        description: descriptionController.text,
+      );
+      print('Complaint: ***************************************${complaint.toMap()}');
+      await FirebaseFirestore.instance
+          .collection("complaints")
+          .add(complaint.toMap());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("🎯 Complaint Registered")),
+      );
+    }
+  }
+
+  late List<String> wards;
+  late List<String> cities;
+  late List<String> topics;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    wards = context.read<DataProvider>().items;
+    cities = context.read<DataProvider>().cities;
+    topics = context.read<DataProvider>().topics;
+  }
+
   @override
   Widget build(BuildContext context) {
-    String? selectedCity;
-
-    String? selectedTopic;
-    bool keepAnonymous = false;
-    String? selectedWard;
-    final List<String> wards = context.read<DataProvider>().items;
-    final List<String> cities = context.read<DataProvider>().cities;
-    final List<String> topics = context.read<DataProvider>().topics;
-    TextEditingController cityController = TextEditingController();
-    TextEditingController wardController = TextEditingController();
-    TextEditingController addressController = TextEditingController();
-    TextEditingController topicController = TextEditingController();
-    TextEditingController descriptionController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    void registerComplaint() async {
-      if (formKey.currentState!.validate()) {
-        Complaint complaint = Complaint(
-          city: cityController.text,
-          ward: wardController.text,
-          address: addressController.text,
-          topic: topicController.text,
-          description: descriptionController.text,
-        );
-        await FirebaseFirestore.instance
-            .collection("complaints")
-            .add(complaint.toMap());
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("🎯 Complaint Registered")),
-        );
-      }
-    }
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -172,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
               const Text('Complaint, Here',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
-            
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -188,9 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: city, child: Text(city));
                         }).toList(),
                         onChanged: (value) {
-                          setState(() {
-                            selectedCity = value.toString();
-                          });
+                          selectedCity = value.toString();
                         },
                         validator: (value) =>
                             value == null ? "Select Topic" : null,
@@ -208,9 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: ward, child: Text(ward));
                         }).toList(),
                         onChanged: (value) {
-                          setState(() {
-                            selectedWard = value.toString();
-                          });
+                          selectedWard = value.toString();
                         },
                         validator: (value) =>
                             value == null ? "Select Topic" : null,
@@ -238,11 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: topic, child: Text(topic));
                         }).toList(),
                         onChanged: (value) {
-                          setState(() {
-                            setState(() {
-                              selectedTopic = value.toString();
-                            });
-                          });
+                          selectedTopic = value.toString();
                         },
                         validator: (value) =>
                             value == null ? "Select Topic" : null,
@@ -296,12 +299,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Align(
                 alignment: Alignment.topRight,
-                child: TextButton(
-                    onPressed: () {
-                      
-                    },
-                    child: const Text('view all')),
+                child:
+                    TextButton(onPressed: () {}, child: const Text('view all')),
               ),
+           
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
