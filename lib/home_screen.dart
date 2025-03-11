@@ -9,9 +9,14 @@ import 'package:flutter_application_1/model/data.dart';
 import 'package:flutter_application_1/providers/data_provider.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     String? selectedCity;
@@ -89,7 +94,11 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               title: const Text('Logout'),
-              onTap: () {},
+              onTap: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => const AuthCheck()));
+              },
             ),
           ],
         ),
@@ -163,6 +172,7 @@ class HomeScreen extends StatelessWidget {
               const Text('Complaint, Here',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
+            
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -178,8 +188,12 @@ class HomeScreen extends StatelessWidget {
                               value: city, child: Text(city));
                         }).toList(),
                         onChanged: (value) {
-                          selectedCity = value.toString();
+                          setState(() {
+                            selectedCity = value.toString();
+                          });
                         },
+                        validator: (value) =>
+                            value == null ? "Select Topic" : null,
                         decoration: InputDecoration(
                             labelText: 'Select City',
                             border: OutlineInputBorder(
@@ -194,8 +208,12 @@ class HomeScreen extends StatelessWidget {
                               value: ward, child: Text(ward));
                         }).toList(),
                         onChanged: (value) {
-                          selectedWard = value.toString();
+                          setState(() {
+                            selectedWard = value.toString();
+                          });
                         },
+                        validator: (value) =>
+                            value == null ? "Select Topic" : null,
                         decoration: InputDecoration(
                             labelText: 'Select Ward no.',
                             border: OutlineInputBorder(
@@ -220,8 +238,14 @@ class HomeScreen extends StatelessWidget {
                               value: topic, child: Text(topic));
                         }).toList(),
                         onChanged: (value) {
-                          selectedTopic = value.toString();
+                          setState(() {
+                            setState(() {
+                              selectedTopic = value.toString();
+                            });
+                          });
                         },
+                        validator: (value) =>
+                            value == null ? "Select Topic" : null,
                         decoration: InputDecoration(
                             labelText: 'Select Topic',
                             border: OutlineInputBorder(
@@ -238,17 +262,17 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: keepAnonymous,
-                            onChanged: (value) {
-                              keepAnonymous = value!;
-                            },
-                          ),
-                          const Text('Keep Anonymous'),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Checkbox(
+                      //       value: keepAnonymous,
+                      //       onChanged: (value) {
+                      //         keepAnonymous = value!;
+                      //       },
+                      //     ),
+                      //     const Text('Keep Anonymous'),
+                      //   ],
+                      // ),
                       const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: registerComplaint,
@@ -274,11 +298,7 @@ class HomeScreen extends StatelessWidget {
                 alignment: Alignment.topRight,
                 child: TextButton(
                     onPressed: () {
-                      FirebaseAuth.instance.signOut();
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const AuthCheck()));
+                      
                     },
                     child: const Text('view all')),
               ),
