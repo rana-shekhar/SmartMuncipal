@@ -1,12 +1,14 @@
-// import 'dart:js_interop';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/auth_check.dart';
 import 'package:flutter_application_1/complaint_details.dart';
 import 'package:flutter_application_1/model/data.dart';
 import 'package:flutter_application_1/providers/data_provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,37 +19,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String?selectedCity;
-
+  String? selectedCity;
   String? selectedTopic;
   bool keepAnonymous = false;
   String? selectedWard;
+  // File? _imageFile;
+  final picker = ImagePicker();
+  String? imageUrl;
 
-  TextEditingController cityController = TextEditingController();
-  TextEditingController wardController = TextEditingController();
   TextEditingController addressController = TextEditingController();
-  TextEditingController topicController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-
-  void registerComplaint() async {
-    if (formKey.currentState!.validate()) {
-      Complaint complaint = Complaint(
-        city: selectedCity ?? '',
-        ward: selectedWard ?? '',
-        address: addressController.text,
-        topic: selectedTopic ?? '',
-        description: descriptionController.text,
-      );
-      print('Complaint: ***************************************${complaint.toMap()}');
-      await FirebaseFirestore.instance
-          .collection("complaints")
-          .add(complaint.toMap());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("🎯 Complaint Registered")),
-      );
-    }
-  }
 
   late List<String> wards;
   late List<String> cities;
@@ -55,11 +37,95 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+
     wards = context.read<DataProvider>().items;
     cities = context.read<DataProvider>().cities;
     topics = context.read<DataProvider>().topics;
+  }
+
+  // Future<void> pickImage() async {
+  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _imageFile = File(pickedFile.path);
+  //     });
+  //   }
+  // }
+
+  // Future<void> uploadImage() async {
+  //   if (_imageFile == null) return;
+
+  //   try {
+  //     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+  //     Reference storageRef = FirebaseStorage.instance
+  //         .ref()
+  //         .child('complaint_images/$fileName.jpg');
+
+  //     UploadTask uploadTask = storageRef.putFile(_imageFile!);
+  //     TaskSnapshot snapshot = await uploadTask;
+
+  //     String downloadUrl = await snapshot.ref.getDownloadURL();
+
+  //     setState(() {
+  //       imageUrl = downloadUrl;
+  //     });
+
+  //     print("Image uploaded: $imageUrl");
+  //   } catch (e) {
+  //     print("Upload failed: $e");
+  //   }
+  // }
+
+  void registerComplaint() async {
+    if (formKey.currentState!.validate()) {
+      if (selectedCity == null ||
+          selectedWard == null ||
+          addressController.text.isEmpty ||
+          selectedTopic == null) {
+        print("All fields are required!");
+        return;
+      }
+
+      // if (_imageFile != null) {
+      //   await uploadImage();
+      // }
+
+      DocumentReference docRef =
+          FirebaseFirestore.instance.collection("complaints").doc();
+
+      String complaintId = docRef.id;
+
+      Complaint complaint = Complaint(
+        id: complaintId,
+        city: selectedCity ?? '',
+        ward: selectedWard ?? '',
+        address: addressController.text,
+        topic: selectedTopic ?? '',
+        description: descriptionController.text,
+        // imageUrl: imageUrl,
+      );
+      // print('%%%%%%%%%%*********************************************$imageUrl');
+
+      await docRef.set(complaint.toMap());
+
+      print('Complaint Registered with ID: $complaintId');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("🎯 Complaint Registered")),
+      );
+
+      setState(() {
+        selectedCity = null;
+        selectedWard = null;
+        selectedTopic = null;
+        addressController.clear();
+        descriptionController.clear();
+        // _imageFile = null;
+        imageUrl = null;
+      });
+    }
   }
 
   @override
@@ -80,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context) => IconButton(
               onPressed: () {
                 Scaffold.of(context)
-                    .openEndDrawer(); // Left se drawer open hoga
+                    .openEndDrawer(); // Open drawer from the right
               },
               icon: const Icon(Icons.settings, color: Colors.white),
             ),
@@ -199,10 +265,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: city, child: Text(city));
                         }).toList(),
                         onChanged: (value) {
-                          selectedCity = value.toString();
+                          setState(() {
+                            selectedCity = value.toString();
+                          });
                         },
                         validator: (value) =>
-                            value == null ? "Select Topic" : null,
+                            value == null ? "Select City" : null,
                         decoration: InputDecoration(
                             labelText: 'Select City',
                             border: OutlineInputBorder(
@@ -217,10 +285,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: ward, child: Text(ward));
                         }).toList(),
                         onChanged: (value) {
-                          selectedWard = value.toString();
+                          setState(() {
+                            selectedWard = value.toString();
+                          });
                         },
                         validator: (value) =>
-                            value == null ? "Select Topic" : null,
+                            value == null ? "Select Ward" : null,
                         decoration: InputDecoration(
                             labelText: 'Select Ward no.',
                             border: OutlineInputBorder(
@@ -245,7 +315,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: topic, child: Text(topic));
                         }).toList(),
                         onChanged: (value) {
-                          selectedTopic = value.toString();
+                          setState(() {
+                            selectedTopic = value.toString();
+                          });
                         },
                         validator: (value) =>
                             value == null ? "Select Topic" : null,
@@ -257,6 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 10),
                       TextField(
+                        controller: descriptionController,
                         maxLines: 5,
                         decoration: InputDecoration(
                           labelText: 'Topic Details / Title',
@@ -265,18 +338,55 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 10),
+
                       // Row(
                       //   children: [
-                      //     Checkbox(
-                      //       value: keepAnonymous,
-                      //       onChanged: (value) {
-                      //         keepAnonymous = value!;
+                      //     // Image Preview
+                      //     if (_imageFile != null)
+                      //       ClipRRect(
+                      //         borderRadius: BorderRadius.circular(10),
+                      //         child: Image.file(
+                      //           _imageFile!,
+                      //           height: 50,
+                      //           width: 50,
+                      //           fit: BoxFit.cover,
+                      //         ),
+                      //       )
+                      //     else
+                      //       const Icon(Icons.image,
+                      //           size: 50, color: Colors.grey),
+
+                      //     const SizedBox(width: 10),
+
+                      //     ElevatedButton(
+                      //       onPressed: () {
+                      //         if (_imageFile == null) {
+                      //           pickImage();
+                      //         } else {
+                      //           ScaffoldMessenger.of(context).showSnackBar(
+                      //             const SnackBar(
+                      //               content:
+                      //                   Text("You can only upload one image!"),
+                      //             ),
+                      //           );
+                      //         }
                       //       },
+                      //       style: ElevatedButton.styleFrom(
+                      //         backgroundColor: Colors.blue,
+                      //         padding: const EdgeInsets.symmetric(
+                      //             horizontal: 16, vertical: 10),
+                      //       ),
+                      //       child: const Text(
+                      //         'Upload Image',
+                      //         style: TextStyle(color: Colors.white),
+                      //       ),
                       //     ),
-                      //     const Text('Keep Anonymous'),
                       //   ],
                       // ),
-                      const SizedBox(height: 10),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       ElevatedButton(
                         onPressed: registerComplaint,
                         style: ElevatedButton.styleFrom(
@@ -302,52 +412,134 @@ class _HomeScreenState extends State<HomeScreen> {
                 child:
                     TextButton(onPressed: () {}, child: const Text('view all')),
               ),
-           
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 4,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.8,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemBuilder: (context, index) {
-                  return Card(
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ComplaintDetails(),
-                          ),
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          Image.network(
-                            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEzuF76aExMemVM_FESKsa3aPmFmusr8ApFw&s',
-                            height: 100,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                          const Expanded(
-                            child: ListTile(
-                              title: Text('Road Damage'),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('shubham'),
-                                  Text('Ward no.2'),
-                                  Text('In-Progress'),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection("complaints")
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text("No complaints found"));
+                  }
+
+                  var complaints = snapshot.data!.docs;
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: complaints.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.9,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
                     ),
+                    itemBuilder: (context, index) {
+                      var complaintData =
+                          complaints[index].data() as Map<String, dynamic>;
+
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(15), // Rounded corners
+                        ),
+                        elevation: 4, // Shadow effect
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ComplaintDetails(
+                                  complaintId: complaints[index].id,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(15)),
+                                child: Image.network(
+                                  complaintData['imageUrl'] ??
+                                      'https://via.placeholder.com/150', // Default image
+                                  height: 100,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      complaintData['topic'] ?? 'No Topic',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on,
+                                            size: 16, color: Colors.red),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            complaintData['address'] ??
+                                                'No Address',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black54),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.home_work,
+                                            size: 16, color: Colors.blue),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          "Ward: ${complaintData['ward'] ?? 'N/A'}",
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black54),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_city,
+                                            size: 16, color: Colors.green),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          complaintData['city'] ?? 'No City',
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black54),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),

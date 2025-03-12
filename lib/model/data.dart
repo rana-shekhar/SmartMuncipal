@@ -37,6 +37,7 @@ class Complaint {
   String address;
   String topic;
   String description;
+  String id;
 
   Complaint({
     required this.city,
@@ -44,6 +45,7 @@ class Complaint {
     required this.address,
     required this.topic,
     required this.description,
+    required this.id, String? imageUrl,
   });
   Map<String, dynamic> toMap() {
     return {
@@ -52,6 +54,7 @@ class Complaint {
       "address": address,
       "topic": topic,
       "description": description,
+      "id": id,
     };
   }
 }
